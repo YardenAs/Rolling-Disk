@@ -1,4 +1,4 @@
-function [Xdot] = DerivativesL(t, X)
+function [Xdot] = DerivativesL(t, X) %#ok
 % The dynamic equations of the rolling disk - Using Lagrange method
 
 x = X(1); y = X(3); psi = X(5); th = X(7); phi = X(9);
