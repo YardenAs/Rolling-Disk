@@ -39,7 +39,6 @@ axis equal
 xlim([min(x) - R, max(x) + R]); ylim([min(y) - R, max(y) + R]); zlim([-1.2*2*R 1.2*2*R]);
 
 for ii = 1:len
-    
     set(disk,'xdata',xcircle(ii,:), 'ydata', ycircle(ii,:), 'zdata', zcircle(ii,:));
     addpoints(path, x(ii), y(ii), 0);
     set(pointA, 'xdata', a(ii,1), 'ydata', a(ii,2), 'zdata', a(ii,3));
