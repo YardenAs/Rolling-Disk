@@ -8,12 +8,11 @@ ang = linspace(0, 2*pi, 40).';
 circle = [R*cos(ang) R*sin(ang)];
 pcircle = [zeros(40,1) circle(:,1) circle(:,2)];
 
-len = length(X);
 % Coordinate systems definition
+len = length(X);
 e1p = [cos(psi), sin(psi), zeros(len,1)];
 e2p = [-sin(psi), cos(psi), zeros(len,1)];
 e3p = [zeros(len,1) zeros(len,1) ones(len,1)];  
-
 e3pp = zeros(len,3); e1pp = zeros(len,3); c = zeros(len,3); e2pp = e2p; %#ok
 
 % Calculate ei_pp and COM for each timestep.
@@ -23,21 +22,27 @@ for ii = 1:len
     c(ii,:) = [x(ii) y(ii) 0] + R*e3pp(ii,:);
 end
 
-figure
-set(gcf, 'color', 'w')
+
+figure;
+set(gcf, 'color', 'w');
 view(3);
 grid on
 hg = hgtransform('Parent',gca);
 path = animatedline('color', 'b', 'linewidth', 2);
-disk(1) = patch('xdata', pcircle(:,1), 'ydata', pcircle(:,2), 'zdata', pcircle(:,3), 'facecolor', [1, 0.8, 0.6], 'linewidth', 2);
-disk(2) = line('xdata', pcircle(1,1), 'ydata', pcircle(1,2), 'zdata', pcircle(1,3), 'marker', 'o', 'color', 'r', 'markerfacecolor', 'r', 'linewidth', 1);
+disk(1) = patch('xdata', pcircle(:,1), 'ydata', pcircle(:,2),...
+    'zdata', pcircle(:,3), 'facecolor', [1, 0.8, 0.6], 'linewidth', 2);
+disk(2) = line('xdata', pcircle(1,1), 'ydata', pcircle(1,2), 'zdata',...
+    pcircle(1,3), 'marker', 'o', 'color', 'r', 'markerfacecolor', 'r', 'linewidth', 1);
 set(disk, 'Parent', hg);
 axis equal
-xlim([min(x) - R, max(x) + R]); ylim([min(y) - R, max(y) + R]); zlim([-1.2*2*R 1.2*2*R]);
+
+xlim([min(x) - R, max(x) + R]); ylim([min(y) - R, max(y) + R]);
+zlim([-1.2*2*R 1.2*2*R]);
 
 for ii = 1:len
     T = makehgtform('translate', c(ii,:));
-    R = makehgtform('axisrotate', e1pp(ii,:), -phi(ii), 'axisrotate', e2p(ii,:), th(ii), 'zrotate', psi(ii));
+    R = makehgtform('axisrotate', e1pp(ii,:), -phi(ii), 'axisrotate',...
+        e2p(ii,:), th(ii), 'zrotate', psi(ii));
     % Important note about R: note that the first argument is e1pp then e2p
     % then e3! e1pp is defined by ei_p and ei_p is defined by ei. if we
     % change the order of the arguments, we will get rubish.
@@ -46,5 +51,6 @@ for ii = 1:len
     drawnow
 %     pause(0.01)
 end
+
 
 
