@@ -49,9 +49,9 @@ AngMom = [dHc(1) == Mc(1); dHc(2) == Mc(2); dHc(3) == Mc(3)];
 
 % No slip constraint
 
-con = simplify(vcprime.' + cross(wp,-[R*sin(th), 0, R*cos(th)]).') == 0;
+con = simplify(vcprime.' + cross(wp,-[R*sin(th), 0, R*cos(th)]).');
+dcon = ((jacobian(con(1:2),q)*dq) + (jacobian(con(1:2),dq)*ddq)) == 0;
 
 % Dynamic Eqautions
 
-sol = solve([AngMom; LinMom; con(1:2)], [ddx ddy ddpsi ddth ddphi Ft Fs Fn]);
-
+sol = solve([AngMom; LinMom; dcon(1:2)], [ddx ddy ddpsi ddth ddphi Ft Fs Fn]);
