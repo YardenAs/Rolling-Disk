@@ -36,8 +36,8 @@ disk(2) = line('xdata', pcircle(1,1), 'ydata', pcircle(1,2), 'zdata',...
 set(disk, 'Parent', hg);
 axis equal
 
-xlim([min(x) - R, max(x) + R]); ylim([min(y) - R, max(y) + R]);
-zlim([-1.2*2*R 1.2*2*R]);
+xlim([min(x) - 2*R, max(x) + 2*R]); ylim([min(y) - 2*R, max(y) + 2*R]);
+zlim([0 1.2*2*R]);
 
 for ii = 1:len
     T = makehgtform('translate', c(ii,:));
