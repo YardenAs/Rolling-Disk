@@ -45,11 +45,19 @@ for ii = 1:len
         e2p(ii,:), th(ii), 'zrotate', psi(ii));
     % Important note about R: note that the first argument is e1pp then e2p
     % then e3! e1pp is defined by ei_p and ei_p is defined by ei. if we
-    % change the order of the arguments, we will get rubish.
+    % change the order of the arguments, we will get rubbish.
     set(hg, 'Matrix', T*R); % T times R and not R times T!
-    addpoints(path, x(ii), y(ii), 0);
+        addpoints(path, x(ii), y(ii), 0);
+%     e1ppPlot = ((e1pp(ii,:).')*(linspace(0,1,15))).' + repmat(c(ii,:),[15,1]);
+%     e2pPlot  = ((e2p(ii,:).')*(linspace(0,1,15))).' + repmat(c(ii,:),[15,1]);
+%     e3Plot   = ([0;0;1]*(linspace(0,1,15))).' + repmat(c(ii,:),[15,1]);
+%     hold on
+%     h = plot3(e1ppPlot(:,1),e1ppPlot(:,2),e1ppPlot(:,3),'-k',e2pPlot(:,1),e2pPlot(:,2),...
+%         e2pPlot(:,3),'-k',e3Plot(:,1),e3Plot(:,2),e3Plot(:,3),'-k');
+%     hold off
+%     set(h,'Linewidth',2);  
     drawnow
-%     pause(0.01)
+    %     pause(0.01)
 end
 
 

@@ -71,4 +71,9 @@ b = [-C - G;
 
 sol = simplify(a\b);
 
+%% Derive ddth = ddth(th, dth) formula %%
+
+solCon = solve(conT == 0,[dx dy]);
+ddth = subs(sol(4),[dx dy], [solCon.dx solCon.dy]);
+ddth = simplify(ddth);
 
