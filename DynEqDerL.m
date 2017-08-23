@@ -6,6 +6,7 @@ syms Ft Fn Fs real
 Ic = m*R^2/4*[2 0 0; 0 1 0; 0 0 1]; 
 
 q = [x y psi th phi].'; dq = [dx dy dpsi dth dphi].';
+ddq = [ddx ddy ddpsi ddth ddphi].';
 
 % Coordinate systems definition
 e1p = [cos(psi), sin(psi), 0]; e2p = [-sin(psi), cos(psi), 0]; e3p = [0 0 1];
@@ -25,26 +26,21 @@ wp  = [-dphi*cos(th), dth, dpsi + dphi*sin(th)].';
 w = dpsi*e3p + dth*e2p - dphi*e1pp;
 
 % Kinetic energy
-
 T = 1/2*m*(vc*vc.') + 1/2*wpp.'*Ic*wpp;
 
 % Potential energy 
-
 V = -[0 0 -m*g]*rc.';
 
 % Non - holonomic constraints (on ei' coordinate system)
-
 conT = simplify((vcprime + cross(wp,-[R*sin(th), 0, R*cos(th)])).');
 constraint = conT(1:2);
 
 % Equation's matrices
-
 W = simplify(jacobian(constraint,dq));
 M = simplify(hessian(T,dq));
 G = simplify(jacobian(V,q).');
 
 C  = sym(zeros(length(q),1));
-
 for ii = 1:length(q)
     sub(ii) = diff(T,dq(ii)); %#ok
     for jj = 1:length(q)
@@ -70,16 +66,15 @@ b = [-C - G;
 
 sol = simplify(a\b);
 
-%% Derive ddth = ddth(th, dth) formula %%
-syms C1 C2 real
+% Substitute the non holonomic constraints into ddth and ddpsi
 solCon = solve(conT == 0, [dx dy]);
 ddth = subs(sol(4),[dx dy], [solCon.dx solCon.dy]);
-ddth = simplify(ddth);
-L = T - V;
-L = subs(L,[dx dy], [solCon.dx solCon.dy]);
-ConservationMom1 = diff(L,dpsi) == C1;
-ConservationMom2 = diff(L,dphi) == C2;
-solConMom = solve([ConservationMom1 ConservationMom2], [dpsi, dphi]);
-ddth = subs(ddth, [dpsi dphi], [solConMom.dpsi solConMom.dphi]);
+ddpsi = subs(sol(3),[dx dy], [solCon.dx solCon.dy]);
 
-
+%% Linarization %% 
+syms dphi0
+ddpsi = subs(ddpsi,[dphi dth th],[dphi0 0 0]) +...
+    subs(jacobian(ddpsi,[dphi, dth th]),[dphi dth th], [dphi0 0 0])*[dphi dth th].';
+ddth = subs(ddth,[dphi dpsi th],[dphi0 0 0]) +...
+    subs(jacobian(ddth,[dphi, dpsi th]),[dphi dpsi th], [dphi0 0 0])*[dphi dpsi th].';
+dddth = jacobian(ddth,q)*dq + jacobian(ddth,dq)*ddq;
