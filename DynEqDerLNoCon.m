@@ -36,10 +36,18 @@ V = -[0 0 -m*g]*rc.';
 
 conT = simplify((vcprime + cross(wp,-[R*sin(th), 0, R*cos(th)])).');
 constraint = conT(1:2);
+solCon = solve(conT == 0, [dx dy]);
+
+% Substitute the constraint to the lagrangian
+
+T = subs(T,[dx dy], [solCon.dx solCon.dy]);
+V = subs(V,[dx dy], [solCon.dx solCon.dy]);
+q(1:2) = [];
+dq(1:2) = [];
+
 
 % Equation's matrices
 
-W = simplify(jacobian(constraint,dq));
 M = simplify(hessian(T,dq));
 G = simplify(jacobian(V,q).');
 
@@ -55,31 +63,21 @@ for ii = 1:length(q)
 end
 C = simplify(C); % C vector
 
-n = size(W);
-Wdot = sym(zeros(n));
-for i = 1:n(1)
-    Wdot(i,:) = (jacobian(W(i,:),q)*dq).';
-end
-Wdot = simplify(Wdot);
+sol = M\(- C - G);
 
-a = [M -W.';
-    W zeros(2,2)];
-    
-b = [-C - G;
-    -Wdot*dq];
-
-sol = simplify(a\b);
-
-%% Derive ddth = ddth(th, dth) formula %%
+%% Derive ddth = ddth(th, C1, C2) formula %%
 syms C1 C2 real
-solCon = solve(conT == 0, [dx dy]);
-ddth = subs(sol(4),[dx dy], [solCon.dx solCon.dy]);
-ddth = simplify(ddth);
 L = T - V;
-L = subs(L,[dx dy], [solCon.dx solCon.dy]);
+ddth = sol(2);
 ConservationMom1 = diff(L,dpsi) == C1;
 ConservationMom2 = diff(L,dphi) == C2;
 solConMom = solve([ConservationMom1 ConservationMom2], [dpsi, dphi]);
 ddth = subs(ddth, [dpsi dphi], [solConMom.dpsi solConMom.dphi]);
 
-
+%% ddth when the disk is upright %%
+syms dphi0
+C10 = subs(diff(L,dpsi),[th dphi dpsi],[0 dphi0 0]);
+C20 = subs(diff(L,dphi),[th dphi dpsi],[0 dphi0 0]);
+ddth = subs(ddth,[C1 C2], [C10 C20]);
+% linearize about th = 0
+ddth = subs(ddth,th,0) + th*subs(diff(ddth,th),th,0);

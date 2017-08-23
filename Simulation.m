@@ -1,6 +1,6 @@
 %% Lagrange and Newton derivation example comparison %%
 
-IC = [0 0 0 10*0.5 0 0 10*pi/180 0 0 10]; 
+IC = [0 0 0 10*0.5 0 0 0 0.8 0 0.1]; 
 % Check that the initial condition satisfies the no slip constraint
 opt = odeset('reltol', 1e-8, 'abstol', 1e-8);
 [TimeL, XL] = ode45(@DerivativesL, [0 15], IC, opt);
@@ -8,7 +8,7 @@ opt = odeset('reltol', 1e-8, 'abstol', 1e-8);
 plot(TimeL, XL(:,7),TimeN, XN(:,7),'--r');
 xlabel('Time [sec]'); ylabel('\theta [rad]');
 legend('Lagrange Derivation', 'Newton Derivation');
-% Animate(X);
+Animate(XL);
 
 %% Stability as function of dPhi %%
 global theta0
