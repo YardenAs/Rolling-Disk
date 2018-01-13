@@ -1,4 +1,4 @@
-function Animate(X)
+function Animate(X, dt)
 % This function animates a rolling disk
 
 x = X(:,1); y = X(:,3); psi = X(:,5); th = X(:,7); phi = X(:,9);
@@ -12,12 +12,12 @@ pcircle = [zeros(40,1) circle(:,1) circle(:,2)];
 len = length(X);
 e1p = [cos(psi), sin(psi), zeros(len,1)];
 e2p = [-sin(psi), cos(psi), zeros(len,1)];
-e3p = [zeros(len,1) zeros(len,1) ones(len,1)];  
+e3p = [zeros(len,1) zeros(len,1) ones(len,1)];
 e3pp = zeros(len,3); e1pp = zeros(len,3); c = zeros(len,3); e2pp = e2p; %#ok
 
 % Calculate ei_pp and COM for each timestep.
 for ii = 1:len
-    e3pp(ii,:) = e1p(ii,:)*sin(th(ii)) + cos(th(ii))*e3p(ii,:); 
+    e3pp(ii,:) = e1p(ii,:)*sin(th(ii)) + cos(th(ii))*e3p(ii,:);
     e1pp(ii,:) = e1p(ii,:)*cos(th(ii)) - sin(th(ii))*e3p(ii,:);
     c(ii,:) = [x(ii) y(ii) 0] + R*e3pp(ii,:);
 end
@@ -39,6 +39,11 @@ axis equal
 xlim([min(x) - 2*R, max(x) + 2*R]); ylim([min(y) - 2*R, max(y) + 2*R]);
 zlim([0 1.2*2*R]);
 
+% dt = 0.0014;
+% animation = VideoWriter('rolling-disk.avi');
+% animation.FrameRate = 1/dt;
+% open(animation);
+
 for ii = 1:len
     T = makehgtform('translate', c(ii,:));
     R = makehgtform('axisrotate', e1pp(ii,:), -phi(ii), 'axisrotate',...
@@ -47,18 +52,11 @@ for ii = 1:len
     % then e3! e1pp is defined by ei_p and ei_p is defined by ei. if we
     % change the order of the arguments, we will get rubbish.
     set(hg, 'Matrix', T*R); % T times R and not R times T!
-        addpoints(path, x(ii), y(ii), 0);
-%     e1ppPlot = ((e1pp(ii,:).')*(linspace(0,1,15))).' + repmat(c(ii,:),[15,1]);
-%     e2pPlot  = ((e2p(ii,:).')*(linspace(0,1,15))).' + repmat(c(ii,:),[15,1]);
-%     e3Plot   = ([0;0;1]*(linspace(0,1,15))).' + repmat(c(ii,:),[15,1]);
-%     hold on
-%     h = plot3(e1ppPlot(:,1),e1ppPlot(:,2),e1ppPlot(:,3),'-k',e2pPlot(:,1),e2pPlot(:,2),...
-%         e2pPlot(:,3),'-k',e3Plot(:,1),e3Plot(:,2),e3Plot(:,3),'-k');
-%     hold off
-%     set(h,'Linewidth',2);  
-    drawnow
-    %     pause(0.01)
+    addpoints(path, x(ii), y(ii), 0);
+    drawnow;
+%     pause(dt/100);
 end
+
 
 
 

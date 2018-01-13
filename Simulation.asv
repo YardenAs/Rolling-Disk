@@ -18,7 +18,7 @@ Animate(XL,dt);
 
 
 %% 3Rdphi0^2 > g
-clear all %#ok
+clear all
 close all
 omega0  = 3;    % [rad/sec]
 R       = 0.5;  % [m] 
@@ -27,7 +27,7 @@ dt  = 1e-2;
 IC = [0 0 0 omega0*R 0 0 0 dtheta0 0 omega0];
 opt = odeset('reltol', 1e-8, 'abstol', 1e-8);
 [Time, X] = ode45(@DerivativesL, 0:dt:7, IC, opt);
-figure();
+figure
 plot(Time, X(:,7));
 xlabel('Time [sec]'); ylabel('\theta [rad]');
 Animate(X, dt);
@@ -45,7 +45,7 @@ plot(Time,Const);
 xlabel('Time [sec]','interpreter','latex'); ylabel('$\dot{H_{a}}$','interpreter','latex');
 
 %% 3Rdphi0^2 < g
-clear all %#ok
+clear all
 close all
 omega0  = 2;    % [rad/sec]
 R       = 0.5;  % [m] 
@@ -63,7 +63,7 @@ Animate(X, dt);
 %% Analytical stability derivation verification (motion of a top) %%
 
 %% 2.5Rdpsii0^2 > 2g
-clear all %#ok
+clear all
 close all
 g = 9.81; th = 10/180*pi; dpsi = 0.5; R = 0.5; psi = 0; alpha = 0.5;
 dphi0 = -(4*g*sin(th) + 2*R*dpsi^2*sin(2*th)...
@@ -79,11 +79,23 @@ opt = odeset('reltol', 1e-9, 'abstol', 1e-9);
 figure()
 plot(Time, X(:,7));
 xlabel('Time [sec]'); ylabel('\theta [rad]');
-Animate(X, dt);
+figure(); Animate(X, dt);
 
+
+th = X(:,7); dphi = X(:,end); dpsi = X(:,6);
+m = 1; R = 0.5; alpha = 1/2;
+for i = 1:length(X)
+    dX(i,:) = DerivativesL(0,X(i,:).'); 
+end
+ddphi = dX(:,end); ddpsi = dX(:,6); dth = X(:,8); 
+Const = sin(th).*(R^2*m*(dphi + dpsi.*sin(th))...
+    + R^2*alpha*m*(dphi + dpsi.*sin(th))) + (R^2*alpha*dpsi.*m.*cos(th).^2)/2;
+figure();
+plot(Time,Const);
+xlabel('Time [sec]','interpreter','latex'); ylabel('$H_{a}$','interpreter','latex');
 
 %% 2.5Rdpsii0^2 < 2g
-clear all %#ok
+clear all 
 close all
 IC = [0 0 0 0 0 3.5 0 0.1 0 0];  
 dt = 1e-2;

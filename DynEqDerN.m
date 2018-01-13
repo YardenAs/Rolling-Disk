@@ -1,11 +1,10 @@
-clear all
-
 syms m g Ic R  real                              % problem's parameters
 syms x y psi th phi dx dy dpsi dth dphi real     % problem's generalized coordinates
 syms ddx ddy ddth ddphi ddpsi ddth real
 syms Ft Fn Fs real
+syms alpha real
 
-Ic = m*R^2/4*[2 0 0; 0 1 0; 0 0 1]; 
+Ic = alpha*m*R^2/2*[2 0 0; 0 1 0; 0 0 1]; 
 
 q = [x y psi th phi].'; dq = [dx dy dpsi dth dphi].';
 ddq = [ddx ddy ddpsi ddth ddphi].';
@@ -55,3 +54,24 @@ dcon = ((jacobian(con(1:2),q)*dq) + (jacobian(con(1:2),dq)*ddq)) == 0;
 % Dynamic Eqautions
 
 sol = solve([AngMom; LinMom; dcon(1:2)], [ddx ddy ddpsi ddth ddphi Ft Fs Fn]);
+
+% Angular Momentum about A
+
+q(1:2) = []; dq(1:2) = []; ddq(1:2) = [];
+vcpp = -cross(wpp,[0 0 -R]);
+vapp = vcpp - cross([-dpsi*sin(th) dth dpsi*cos(th)],[0 0 R]);
+aapp = (jacobian(vapp,q)*dq).' + (jacobian(vapp,dq)*ddq).' ...
+    + cross([-dpsi*sin(th) dth dpsi*cos(th)],vapp);
+vcapp = vcpp - vapp;
+acapp = (jacobian(vcapp,q)*dq).' + (jacobian(vcapp,dq)*ddq).' + ...
+    cross([-dpsi*sin(th) dth dpsi*cos(th)], vcapp);
+acpp = (jacobian(vcpp,q)*dq).' + (jacobian(vcpp,dq)*ddq).' + ...
+    cross([-dpsi*sin(th) dth dpsi*cos(th)], vcpp);
+Ha = m*cross([0 0 R],vcapp).' + Hc;
+HA = m*cross([0 0 R],vcpp).' + Hc;
+dHa = m*cross([0 0 R],acapp).' + dHc;
+dHA = m*cross([0 0 R],acpp).' + dHc;
+dha = jacobian(Ha,q)*dq + jacobian(Ha,dq)*ddq...
+    + cross([-dpsi*sin(th) dth dpsi*cos(th)], Ha).';
+Ma = cross([0 0 R],[m*g*sin(th) 0 -m*g*cos(th)]);
+solp = solve(Ma.' == dHA,[ddth ddpsi ddphi]);

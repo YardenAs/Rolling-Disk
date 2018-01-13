@@ -1,8 +1,9 @@
 syms m g Ic R  real                              % problem's parameters
 syms x y psi th phi dx dy dpsi dth dphi real     % problem's generalized coordinates
 syms ddx ddy ddth ddphi ddpsi ddth real
+syms alpha             
 
-Ic = m*R^2/4*[2 0 0; 0 1 0; 0 0 1]; 
+Ic = alpha*m*R^2/2*[2 0 0; 0 1 0; 0 0 1]; 
 
 q = [x y psi th phi].'; dq = [dx dy dpsi dth dphi].';
 ddq = [ddx ddy ddpsi ddth ddphi].';

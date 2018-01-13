@@ -2,8 +2,10 @@ syms m g Ic R  real                              % problem's parameters
 syms x y psi th phi dx dy dpsi dth dphi real     % problem's generalized coordinates
 syms ddx ddy ddth ddphi ddpsi ddth real
 syms Ft Fn Fs real
+syms alpha
+% alpha = 1/2;
 
-Ic = m*R^2/4*[2 0 0; 0 1 0; 0 0 1]; 
+Ic = alpha*m*R^2/2*[2 0 0; 0 1 0; 0 0 1]; 
 
 q = [x y psi th phi].'; dq = [dx dy dpsi dth dphi].';
 ddq = [ddx ddy ddpsi ddth ddphi].';
@@ -69,12 +71,57 @@ sol = simplify(a\b);
 % Substitute the non holonomic constraints into ddth and ddpsi
 solCon = solve(conT == 0, [dx dy]);
 ddth = subs(sol(4),[dx dy], [solCon.dx solCon.dy]);
-ddpsi = subs(sol(3),[dx dy], [solCon.dx solCon.dy]);
+ddpsiT = subs(sol(3),[dx dy], [solCon.dx solCon.dy]);
+ddphiT = subs(sol(5), [dx dy], [solCon.dx solCon.dy]);
+E = T + V;
+E = subs(E,[dx dy], [solCon.dx solCon.dy]);
 
-%% Linarization %% 
+%% Linarization about th = 0 %% 
 syms dphi0
 ddpsi = subs(ddpsi,[dphi dth th],[dphi0 0 0]) +...
     subs(jacobian(ddpsi,[dphi, dth th]),[dphi dth th], [dphi0 0 0])*[dphi dth th].';
 ddth = subs(ddth,[dphi dpsi th],[dphi0 0 0]) +...
     subs(jacobian(ddth,[dphi, dpsi th]),[dphi dpsi th], [dphi0 0 0])*[dphi dpsi th].';
+ddphi = subs(ddphi,[dphi dpsi th dth],[dphi0 0 0 0]) +...
+    subs(jacobian(ddphi,[dphi, dpsi th dth]),[dphi dpsi th dth], [dphi0 0 0 0])*[dphi dpsi th dth].';
 dddth = jacobian(ddth,q)*dq + jacobian(ddth,dq)*ddq;
+dddth = subs(dddth,ddpsi,-2*dphi0*dth); %#ok
+
+%% Linarization about general point %%
+% find equilibrium
+syms dphi0 ths rho
+eq = 0 == simplify(subs(sol(4),[dx dy], [solCon.dx solCon.dy]));
+eq = subs(eq, [th dphi] , [ths dphi0]);
+eq1 = rho*dpsi == R*dphi0;
+SteadyState = solve([eq eq1], [dpsi rho]);
+% linearize
+ddpsiT = subs(ddpsiT,[dphi dth th],[dphi0 0 ths]) +...
+    subs(jacobian(ddpsiT,[dphi, dth th]),[dphi dth th], [dphi0 0 ths])*[dphi dth th].';
+ddth = subs(ddth,[dphi dpsi th],[dphi0 SteadyState.dpsi(1) ths]) +...
+    subs(jacobian(ddth,[dphi, dpsi th]),[dphi dpsi th], [dphi0 SteadyState.dpsi(1) ths])*[dphi dpsi th].';
+ddphiT = subs(ddphiT,[dphi dpsi th dth],[dphi0 SteadyState.dpsi(1) ths 0]) +...
+    subs(jacobian(ddphiT,[dphi, dpsi th dth]),[dphi dpsi th dth], [dphi0 SteadyState.dpsi(1) ths 0])*[dphi dpsi th dth].';
+dddth = simplify(jacobian(ddth,q)*dq + jacobian(ddth,dq)*ddq);
+dddth = subs(dddth, [ddpsi ddphi], [ddpsiT, ddphiT]);
+
+% find A matrix
+ddth = subs(ddth,alpha,1/2);
+ddphiT = subs(ddphiT,alpha,1/2);
+ddpsiT = subs(ddpsiT,alpha,1/2);
+X = [th;dth;dpsi;dphi];
+A = simplify(jacobian([ddth; ddpsiT; ddphiT],X));
+A = [0 1 0 0;A];
+
+%% Linearization about th = 0, no roll
+syms dpsi0
+ddpsiT = subs(ddpsiT,[dphi dth th],[0 0 0]) +...
+    subs(jacobian(ddpsiT,[dphi, dth th]),[dphi dth th], [0 0 0])*[dphi dth th].';
+ddth = subs(ddth,[dphi dpsi th],[0 dpsi0 0]) +...
+    subs(jacobian(ddth,[dphi, dpsi th]),[dphi dpsi th], [0 dpsi0 0])*[dphi dpsi th].';
+ddphiT = subs(ddphiT,[dphi dpsi th dth],[0 dpsi0 0 0]) +...
+    subs(jacobian(ddphiT,[dphi, dpsi th dth]),[dphi dpsi th dth], [0 dpsi0 0 0])*[dphi dpsi th dth].';
+dddth = jacobian(ddth,q)*dq + jacobian(ddth,dq)*ddq;
+dddth = subs(dddth,ddphi,ddphiT); 
+
+
+
